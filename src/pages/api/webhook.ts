@@ -51,7 +51,7 @@ export const POST: APIRoute = async ({ request }) => {
 
 
 
-    let order;
+    let order: any;
     try {
       order = JSON.parse(rawBody);
     } catch (e) {
