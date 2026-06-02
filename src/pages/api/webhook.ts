@@ -9,6 +9,14 @@ export const POST: APIRoute = async ({ request }) => {
     const topic = request.headers.get('x-wc-webhook-topic') || '';
     const webhookSecret = import.meta.env.WOOCOMMERCE_WEBHOOK_SECRET || process.env.WOOCOMMERCE_WEBHOOK_SECRET;
 
+    if (topic === 'webhook.ping') {
+      console.log('Recibido ping de WooCommerce. Bypassing validación de firma para permitir el guardado.');
+      return new Response(JSON.stringify({ success: true, message: 'Ping recibido' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     // Verificar firma si está configurada en las variables de entorno
     if (webhookSecret) {
       if (!signature) {
@@ -41,13 +49,7 @@ export const POST: APIRoute = async ({ request }) => {
       }
     }
 
-    if (topic === 'webhook.ping') {
-      console.log('Recibido ping de WooCommerce. Webhook configurado correctamente.');
-      return new Response(JSON.stringify({ success: true, message: 'Ping recibido' }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+
 
     let order;
     try {
