@@ -336,7 +336,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
           updateConnectionStatus('connecting', 'Polling activo (sin Pusher)');
           
           // Polling como fallback cada 15 segundos si no hay Pusher
-          startPolling(15000);
+          startPolling(600000);
           return;
         }
 
@@ -360,12 +360,12 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
 
           pusher.connection.bind('disconnected', () => {
             updateConnectionStatus('disconnected', 'Desconectado');
-            startPolling(15000); // Polling rápido si se cae la conexión
+            startPolling(600000); // Polling rápido si se cae la conexión
           });
 
           pusher.connection.bind('failed', () => {
             updateConnectionStatus('disconnected', 'Conexión Fallida');
-            startPolling(15000);
+            startPolling(600000);
           });
 
           // Manejar eventos de pedido creado
@@ -418,7 +418,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         } catch (error) {
           console.error('Error al inicializar Pusher:', error);
           updateConnectionStatus('disconnected', 'Error de Tiempo Real');
-          startPolling(15000);
+          startPolling(600000);
         }
       }
 
