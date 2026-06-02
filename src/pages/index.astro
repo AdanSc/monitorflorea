@@ -514,6 +514,11 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
 
           return `
             <article class="order-card glass ${pulseClass}" data-id="${order.id}">
+      <!-- Imagen de portada del pedido -->
+      <div class="order-card-image-wrapper">
+        <img src="${order.line_items?.[0]?.image?.src || ''}" alt="${order.line_items?.[0]?.name || 'Producto'}" class="order-card-image" />
+        <button class="zoom-btn" data-src="${order.line_items?.[0]?.image?.src || ''}" aria-label="Ver imagen en grande"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      </div>
               <div class="order-header">
                 <div>
                   <div class="order-number">#${order.number}</div>
@@ -606,7 +611,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         const name = `${order.billing?.first_name || ''} ${order.billing?.last_name || ''}`;
         const itemsHtml = order.line_items.map(item => `
           <tr>
-            <td>${item.name}</td>
+            <td><img src="${item.image?.src || ''}" alt="${item.name}" style="width:40px;height:auto;margin-right:8px;vertical-align:middle;"/>${item.name}</td>
             <td style="text-align: center;">${item.quantity}</td>
             <td style="text-align: right;">${item.total != null ? `$${parseFloat(item.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '-'} </td>
           </tr>
@@ -863,6 +868,36 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         };
         return statuses[status] || status;
       }
+
+      // Lightbox functionality for order card images
+      document.addEventListener('click', (e) => {
+        const target = e.target as HTMLElement;
+        const zoomBtn = target.closest('.zoom-btn') as HTMLElement;
+        if (zoomBtn) {
+          e.stopPropagation();
+          const src = zoomBtn.dataset.src;
+          const lightbox = document.getElementById('image-lightbox');
+          if (lightbox && src) {
+            const img = lightbox.querySelector('img') as HTMLImageElement;
+            if (img) {
+              img.src = src;
+              lightbox.hidden = false;
+              // Prevent body scrolling while modal is open
+              document.body.style.overflow = 'hidden';
+            }
+          }
+        } else if (target.id === 'image-lightbox' || target.closest('#image-lightbox') && !target.closest('.lightbox-img')) {
+          // Close when clicking outside the image
+          const lightbox = document.getElementById('image-lightbox');
+          if (lightbox) {
+            lightbox.hidden = true;
+            document.body.style.overflow = '';
+          }
+        }
+      });
     </script>
+  <div id="image-lightbox" class="image-lightbox" hidden>
+    <img src="" alt="Imagen ampliada" class="lightbox-img" />
+  </div>
   </body>
 </html>
