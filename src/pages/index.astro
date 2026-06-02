@@ -535,7 +535,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
               <div class="order-footer">
                 <div>
                   <div class="order-total-label">Total</div>
-                  <div class="order-total">$${parseFloat(order.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+                  <div class="order-total">${order.total != null ? `$${parseFloat(order.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '-'} </div>
                 </div>
                 
                 <div class="actions" style="display: flex; gap: 0.5rem; align-items: center;">
@@ -608,7 +608,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
           <tr>
             <td>${item.name}</td>
             <td style="text-align: center;">${item.quantity}</td>
-            <td style="text-align: right;">$${parseFloat(item.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: right;">${item.total != null ? `$${parseFloat(item.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '-'} </td>
           </tr>
         `).join('');
 
@@ -693,7 +693,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
               
               <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
                 <span style="font-weight: 600;">Total del Pedido</span>
-                <span class="order-total" style="font-size: 1.5rem;">$${parseFloat(order.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</span>
+                <span class="order-total" style="font-size: 1.5rem;">${order.total != null ? `$${parseFloat(order.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '-'} </span>
               </div>
             </div>
 

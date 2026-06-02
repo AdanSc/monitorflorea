@@ -20,7 +20,23 @@ export const GET: APIRoute = async ({ request }) => {
     }
 
     const orders = await fetchOrders(params);
-    return new Response(JSON.stringify({ success: true, orders }), {
+    // Sanitize orders to hide price information
+    const sanitizedOrders = orders.map(order => {
+      // Set price-related fields to null to avoid NaN in the UI and hide line-item totals
+      const sanitizedOrder = {
+        ...order,
+        total: null,
+        total_tax: null,
+        line_items: order.line_items.map((item: any) => ({
+          ...item,
+          price: null,
+          total: null,
+          subtotal: null,
+        })),
+      };
+      return sanitizedOrder;
+    });
+    return new Response(JSON.stringify({ success: true, orders: sanitizedOrders }), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
