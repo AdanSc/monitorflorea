@@ -12,6 +12,7 @@ export const POST: APIRoute = async ({ request }) => {
     // Verificar firma si está configurada en las variables de entorno
     if (webhookSecret) {
       if (!signature) {
+        console.error('Webhook: Falta la firma (header x-wc-webhook-signature).');
         return new Response(JSON.stringify({ success: false, error: 'Falta la firma del webhook.' }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' }
@@ -24,20 +25,42 @@ export const POST: APIRoute = async ({ request }) => {
         .digest('base64');
 
       if (computedSignature !== signature) {
-        console.warn('Firma del webhook de WooCommerce inválida.');
-        return new Response(JSON.stringify({ success: false, error: 'Firma inválida.' }), {
+        console.error(`Webhook Error de Firma:`);
+        console.error(`- Recibida (header): ${signature}`);
+        console.error(`- Calculada:         ${computedSignature}`);
+        console.error(`- Secreto usado:     ${webhookSecret.substring(0, 3)}... (longitud: ${webhookSecret.length})`);
+        console.error(`- Body recibido:     ${rawBody}`);
+        return new Response(JSON.stringify({ 
+          success: false, 
+          error: 'Firma inválida.',
+          details: { received: signature, computed: computedSignature }
+        }), {
           status: 401,
           headers: { 'Content-Type': 'application/json' }
         });
       }
     }
 
-    const order = JSON.parse(rawBody);
+    if (topic === 'webhook.ping') {
+      console.log('Recibido ping de WooCommerce. Webhook configurado correctamente.');
+      return new Response(JSON.stringify({ success: true, message: 'Ping recibido' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    let order;
+    try {
+      order = JSON.parse(rawBody);
+    } catch (e) {
+      console.error('Error al parsear el body del webhook:', rawBody);
+      return new Response(JSON.stringify({ success: false, error: 'Body inválido' }), { status: 400 });
+    }
     
     // Determinar el tipo de evento (created o updated)
     const event = topic.includes('created') ? 'created' : 'updated';
     
-    console.log(`Recibido webhook de WooCommerce. Evento: ${event}, Pedido ID: ${order.id}`);
+    console.log(`Recibido webhook de WooCommerce. Evento: ${event}, Pedido ID: ${order?.id}`);
 
     // Transmitir a Pusher en tiempo real
     await triggerOrderUpdate(event, order);
