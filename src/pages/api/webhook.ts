@@ -9,7 +9,12 @@ export const POST: APIRoute = async ({ request }) => {
     const topic = request.headers.get('x-wc-webhook-topic') || '';
     const webhookSecret = import.meta.env.WOOCOMMERCE_WEBHOOK_SECRET || process.env.WOOCOMMERCE_WEBHOOK_SECRET;
 
-    if (topic === 'webhook.ping') {
+    console.log(`[DEBUG Webhook] Topic: "${topic}". Headers recibidos:`, Object.fromEntries(request.headers));
+    console.log(`[DEBUG Webhook] Body:`, rawBody);
+
+    const isPing = topic === 'webhook.ping' || rawBody.includes('webhook_id=');
+
+    if (isPing) {
       console.log('Recibido ping de WooCommerce. Bypassing validación de firma para permitir el guardado.');
       return new Response(JSON.stringify({ success: true, message: 'Ping recibido' }), {
         status: 200,
