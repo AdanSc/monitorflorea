@@ -1,9 +1,9 @@
 ---
-import '../styles/global.css';
+import "../styles/global.css";
 
 // Variables de entorno para Pusher (disponibles en el cliente si empiezan con PUBLIC_)
-const PUBLIC_PUSHER_KEY = import.meta.env.PUBLIC_PUSHER_KEY || '';
-const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
+const PUBLIC_PUSHER_KEY = import.meta.env.PUBLIC_PUSHER_KEY || "";
+const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
 ---
 
 <html lang="es">
@@ -19,34 +19,82 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
     <header class="glass">
       <div class="logo-section">
         <div class="logo-container">
-          <img src="https://floreafloreria.com/wp-content/uploads/2025/07/FLOREA_Logo_PNG.webp" alt="Florea Logo" class="logo-img" />
+          <img
+            src="https://floreafloreria.com/wp-content/uploads/2025/07/FLOREA_Logo_PNG.webp"
+            alt="Florea Logo"
+            class="logo-img"
+          />
           <div class="brand-divider"></div>
           <h1>Monitor de Pedidos</h1>
         </div>
         <p>Control de pedidos en tiempo real para floreafloreria.com</p>
       </div>
-      
+
       <div class="controls-section">
         <!-- Botón de Simulación de Pedido Nuevo -->
-        <button id="simulateBtn" class="btn-icon glass" title="Simular Pedido Nuevo" style="width: auto; padding: 0 1rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; display: flex; gap: 0.35rem; align-items: center; color: var(--primary); border-color: var(--card-border); background: #ffffff;">
+        <button
+          id="simulateBtn"
+          class="btn-icon glass"
+          title="Simular Pedido Nuevo"
+          style="width: auto; padding: 0 1rem; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; display: flex; gap: 0.35rem; align-items: center; color: var(--primary); border-color: var(--card-border); background: #ffffff;"
+        >
           ✨ Simular Pedido
         </button>
 
-        <!-- Indicador de estado de conexión -->
-        <div id="connectionStatus" class="connection-badge disconnected">
-          <span class="dot"></span>
-          <span class="label">Desconectado</span>
-        </div>
-
-        <!-- Botón de sonido (Mute/Unmute) -->
-        <button id="soundToggle" class="btn-icon glass" title="Activar/Desactivar Sonido">
-          <svg id="soundOnIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-          <svg id="soundOffIcon" class="hidden" style="display: none;" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+        <!-- Botón de sonido: solo activo cuando la alarma está sonando -->
+        <button
+          id="soundToggle"
+          class="btn-icon glass"
+          title="Sin alertas activas"
+          disabled
+        >
+          <!-- Icono de candado: botón inactivo -->
+          <svg
+            id="lockedIcon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg
+          >
+          <!-- Icono para silenciar: solo visible en modo alarma -->
+          <svg
+            id="silenceIcon"
+            style="display: none;"
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="22" y1="9" x2="16" y2="15"></line><line x1="16" y1="9" x2="22" y2="15"></line></svg
+          >
+          <span id="silenceLabel" style="display: none; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.03em;">Silenciar</span>
         </button>
 
         <!-- Botón de Recarga Manual -->
         <button id="refreshBtn" class="btn-icon glass" title="Recargar Pedidos">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"
+            ></path></svg
+          >
         </button>
       </div>
     </header>
@@ -58,19 +106,35 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
           <span class="label">Pedidos Totales</span>
           <span class="value">0</span>
         </div>
-        <div id="statPending" class="stat-card glass" style="border-left: 4px solid var(--warning);">
+        <div
+          id="statPending"
+          class="stat-card glass"
+          style="border-left: 4px solid var(--warning);"
+        >
           <span class="label">Pendientes</span>
           <span class="value" style="color: var(--warning);">0</span>
         </div>
-        <div id="statProcessing" class="stat-card glass" style="border-left: 4px solid var(--primary);">
+        <div
+          id="statProcessing"
+          class="stat-card glass"
+          style="border-left: 4px solid var(--primary);"
+        >
           <span class="label">Procesando</span>
           <span class="value" style="color: #818cf8;">0</span>
         </div>
-        <div id="statOnHold" class="stat-card glass" style="border-left: 4px solid var(--orange);">
+        <div
+          id="statOnHold"
+          class="stat-card glass"
+          style="border-left: 4px solid var(--orange);"
+        >
           <span class="label">En Espera</span>
           <span class="value" style="color: var(--orange);">0</span>
         </div>
-        <div id="statCompleted" class="stat-card glass" style="border-left: 4px solid var(--success);">
+        <div
+          id="statCompleted"
+          class="stat-card glass"
+          style="border-left: 4px solid var(--success);"
+        >
           <span class="label">Completados</span>
           <span class="value" style="color: var(--success);">0</span>
         </div>
@@ -81,13 +145,34 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         <div class="filter-buttons">
           <button class="filter-btn active" data-status="all">Todos</button>
           <button class="filter-btn" data-status="pending">Pendiente</button>
-          <button class="filter-btn" data-status="processing">Procesando</button>
+          <button class="filter-btn" data-status="processing">Procesando</button
+          >
           <button class="filter-btn" data-status="on-hold">En Espera</button>
-          <button class="filter-btn" data-status="completed">Completados</button>
+          <button class="filter-btn" data-status="completed">Completados</button
+          >
         </div>
         <div class="search-wrapper">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          <input type="text" id="searchInput" placeholder="Buscar por número o nombre de cliente..." />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><circle cx="11" cy="11" r="8"></circle><line
+              x1="21"
+              y1="21"
+              x2="16.65"
+              y2="16.65"></line></svg
+          >
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Buscar por número o nombre de cliente..."
+          />
         </div>
       </section>
 
@@ -108,7 +193,22 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
     <div id="orderModal" class="modal-overlay">
       <div class="modal-content glass">
         <button id="modalCloseBtn" class="modal-close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            ><line x1="18" y1="6" x2="6" y2="18"></line><line
+              x1="6"
+              y1="6"
+              x2="18"
+              y2="18"></line></svg
+          >
         </button>
         <div class="modal-body" id="modalBody">
           <!-- El contenido del modal se inyectará aquí -->
@@ -121,38 +221,45 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
       // Inyectar variables al objeto window para acceder desde el script ESM de Astro
       window.PUSHER_CONFIG = {
         key: PUBLIC_PUSHER_KEY,
-        cluster: PUBLIC_PUSHER_CLUSTER
+        cluster: PUBLIC_PUSHER_CLUSTER,
       };
     </script>
 
     <script>
-      import Pusher from 'pusher-js';
+      import Pusher from "pusher-js";
 
       // Estado de la aplicación
       let orders = [];
-      let activeFilter = 'all';
-      let searchQuery = '';
-      let isMuted = localStorage.getItem('monitor_muted') === 'true';
+      let activeFilter = "all";
+      let searchQuery = "";
+      let isMuted = localStorage.getItem("monitor_muted") === "true";
       let pollInterval = null;
 
+      // Estado de la alarma de pedidos activos
+      let _alertLoopInterval: ReturnType<typeof setInterval> | null = null;
+      let _alertSilenced = false; // silenciada manualmente por el usuario
+
       // Elementos del DOM
-      const ordersGrid = document.getElementById('ordersGrid');
-      const searchInput = document.getElementById('searchInput') as HTMLInputElement;
-      const filterButtons = document.querySelectorAll('.filter-btn');
-      const connectionStatus = document.getElementById('connectionStatus');
-      const soundToggle = document.getElementById('soundToggle');
-      const soundOnIcon = document.getElementById('soundOnIcon');
-      const soundOffIcon = document.getElementById('soundOffIcon');
-      const refreshBtn = document.getElementById('refreshBtn');
-      const simulateBtn = document.getElementById('simulateBtn');
-      
-      const orderModal = document.getElementById('orderModal');
-      const modalCloseBtn = document.getElementById('modalCloseBtn');
-      const modalBody = document.getElementById('modalBody');
-      const toastContainer = document.getElementById('toastContainer');
+      const ordersGrid = document.getElementById("ordersGrid");
+      const searchInput = document.getElementById(
+        "searchInput",
+      ) as HTMLInputElement;
+      const filterButtons = document.querySelectorAll(".filter-btn");
+      const connectionStatus = document.getElementById("connectionStatus");
+      const soundToggle = document.getElementById("soundToggle") as HTMLButtonElement;
+      const lockedIcon = document.getElementById("lockedIcon");
+      const silenceIcon = document.getElementById("silenceIcon");
+      const silenceLabel = document.getElementById("silenceLabel");
+      const refreshBtn = document.getElementById("refreshBtn");
+      const simulateBtn = document.getElementById("simulateBtn");
+
+
+      const orderModal = document.getElementById("orderModal");
+      const modalCloseBtn = document.getElementById("modalCloseBtn");
+      const modalBody = document.getElementById("modalBody");
+      const toastContainer = document.getElementById("toastContainer");
 
       // Inicialización
-      initSoundSettings();
       fetchOrdersData();
       setupPusherConnection();
       setupEventListeners();
@@ -160,48 +267,53 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
       // Configuración de los Event Listeners
       function setupEventListeners() {
         // Filtrado por botones
-        filterButtons.forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            filterButtons.forEach(b => b.classList.remove('active'));
+        filterButtons.forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            filterButtons.forEach((b) => b.classList.remove("active"));
             const target = e.currentTarget as HTMLButtonElement;
-            target.classList.add('active');
-            activeFilter = target.dataset.status || 'all';
+            target.classList.add("active");
+            activeFilter = target.dataset.status || "all";
             renderOrders();
           });
         });
 
         // Búsqueda en tiempo real
-        searchInput.addEventListener('input', (e) => {
+        searchInput.addEventListener("input", (e) => {
           searchQuery = (e.target as HTMLInputElement).value.toLowerCase();
           renderOrders();
         });
 
         // Botón de recarga manual
-        refreshBtn.addEventListener('click', () => {
+        refreshBtn.addEventListener("click", () => {
           animateBtn(refreshBtn);
           fetchOrdersData();
         });
 
         // Botón de simulación de pedido nuevo
         if (simulateBtn) {
-          simulateBtn.addEventListener('click', simulateNewOrder);
+          simulateBtn.addEventListener("click", simulateNewOrder);
         }
 
-        // Mute / Unmute
-        soundToggle.addEventListener('click', toggleMute);
+        // Solo silenciar cuando la alarma está activa
+        soundToggle.addEventListener("click", () => {
+          if (_alertLoopInterval || (_alertSilenced && silenceIcon?.style.display !== 'none')) {
+            silenceAlert();
+          }
+          // Si el botón está desactivado, no hace nada
+        });
 
         // Cerrar modal
-        modalCloseBtn.addEventListener('click', closeModal);
-        orderModal.addEventListener('click', (e) => {
+        modalCloseBtn.addEventListener("click", closeModal);
+        orderModal.addEventListener("click", (e) => {
           if (e.target === orderModal) closeModal();
         });
       }
 
       // Animación simple de rotación para recarga
       function animateBtn(btn) {
-        btn.style.transform = 'rotate(360deg)';
+        btn.style.transform = "rotate(360deg)";
         setTimeout(() => {
-          btn.style.transform = 'none';
+          btn.style.transform = "none";
         }, 500);
       }
 
@@ -211,29 +323,38 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         const mockOrder = {
           id: mockId,
           number: String(mockId),
-          status: 'pending',
+          status: "pending",
           total: (Math.random() * 800 + 200).toFixed(2),
           billing: {
-            first_name: 'Sofía',
-            last_name: 'García',
-            email: 'sofia.garcia@ejemplo.com',
-            phone: '55 9876 5432'
+            first_name: "Sofía",
+            last_name: "García",
+            email: "sofia.garcia@ejemplo.com",
+            phone: "55 9876 5432",
           },
           shipping: {
-            address_1: 'Av. Horacio 1500',
-            address_2: 'Depto 402',
-            city: 'Polanco, CDMX',
-            state: 'CDMX',
-            postcode: '11560'
+            address_1: "Av. Horacio 1500",
+            address_2: "Depto 402",
+            city: "Polanco, CDMX",
+            state: "CDMX",
+            postcode: "11560",
           },
-          customer_note: 'Por favor entregar por la tarde. El arreglo es un regalo sorpresa de cumpleaños.',
-          payment_method_title: 'Transferencia SPEI',
+          customer_note:
+            "Por favor entregar por la tarde. El arreglo es un regalo sorpresa de cumpleaños.",
+          payment_method_title: "Transferencia SPEI",
           date_created: new Date().toISOString(),
           line_items: [
-            { name: 'Arreglo de Tulipanes Amarillos Elegante', quantity: 1, total: '750.00' },
-            { name: 'Caja de Chocolates Trufados', quantity: 1, total: '250.00' }
+            {
+              name: "Arreglo de Tulipanes Amarillos Elegante",
+              quantity: 1,
+              total: "750.00",
+            },
+            {
+              name: "Caja de Chocolates Trufados",
+              quantity: 1,
+              total: "250.00",
+            },
           ],
-          _isNew: true
+          _isNew: true,
         };
 
         // Insertar al inicio de la lista de pedidos
@@ -241,7 +362,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         renderOrders();
         updateStats();
         playChime();
-        showToast(`¡Nuevo pedido recibido! #${mockOrder.number}`, 'success');
+        showToast(`¡Nuevo pedido recibido! #${mockOrder.number}`, "success");
       }
 
       // Obtener datos iniciales
@@ -256,7 +377,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
             `;
           }
 
-          const response = await fetch('/api/orders');
+          const response = await fetch("/api/orders");
           const data = await response.json();
 
           if (data.success && Array.isArray(data.orders)) {
@@ -264,10 +385,13 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
             renderOrders();
             updateStats();
           } else {
-            showError('No se pudieron obtener los pedidos: ' + (data.error || 'Error desconocido'));
+            showError(
+              "No se pudieron obtener los pedidos: " +
+                (data.error || "Error desconocido"),
+            );
           }
         } catch (error) {
-          showError('Error de red al obtener pedidos.');
+          showError("Error de red al obtener pedidos.");
           console.error(error);
         }
       }
@@ -277,20 +401,25 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         if (isMuted) return;
 
         try {
-          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const ctx = new (
+            window.AudioContext || (window as any).webkitAudioContext
+          )();
           const playTone = (freq, startTime, duration) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            
-            osc.type = 'sine';
+
+            osc.type = "sine";
             osc.frequency.setValueAtTime(freq, startTime);
-            
-            gain.gain.setValueAtTime(0.15, startTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-            
+
+            gain.gain.setValueAtTime(0.5, startTime);
+            gain.gain.exponentialRampToValueAtTime(
+              0.0001,
+              startTime + duration,
+            );
+
             osc.connect(gain);
             gain.connect(ctx.destination);
-            
+
             osc.start(startTime);
             osc.stop(startTime + duration);
           };
@@ -301,110 +430,165 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
           playTone(659.25, now + 0.1, 0.4);
           playTone(783.99, now + 0.2, 0.6);
         } catch (error) {
-          console.error('No se pudo reproducir el sonido (AudioContext):', error);
+          console.error(
+            "No se pudo reproducir el sonido (AudioContext):",
+            error,
+          );
         }
       }
 
-      // Configurar el muteo de sonido
-      function initSoundSettings() {
-        if (isMuted) {
-          soundOnIcon.style.display = 'none';
-          soundOffIcon.style.display = 'block';
+      // --- Alarma de pedidos activos en loop ---
+      function _setAlarmMode(active: boolean) {
+        if (!soundToggle) return;
+        if (active) {
+          // Activar botón: modo alarma rojo + texto Silenciar
+          soundToggle.disabled = false;
+          soundToggle.title = "Silenciar Alarma";
+          soundToggle.style.width = "auto";
+          soundToggle.style.borderRadius = "9999px";
+          soundToggle.style.padding = "0 1rem";
+          soundToggle.style.gap = "0.4rem";
+          soundToggle.style.background = "#dc2626";
+          soundToggle.style.borderColor = "#dc2626";
+          soundToggle.style.color = "#ffffff";
+          soundToggle.style.opacity = "1";
+          soundToggle.style.cursor = "pointer";
+          if (lockedIcon) lockedIcon.style.display = "none";
+          if (silenceIcon) silenceIcon.style.display = "block";
+          if (silenceLabel) silenceLabel.style.display = "inline";
+          soundToggle.classList.add("alert-pulse");
         } else {
-          soundOnIcon.style.display = 'block';
-          soundOffIcon.style.display = 'none';
+          // Desactivar botón: candado gris, no clickeable
+          soundToggle.disabled = true;
+          soundToggle.title = "Sin alertas activas";
+          soundToggle.style.width = "40px";
+          soundToggle.style.borderRadius = "50%";
+          soundToggle.style.padding = "";
+          soundToggle.style.gap = "";
+          soundToggle.style.background = "";
+          soundToggle.style.borderColor = "";
+          soundToggle.style.color = "var(--text-muted)";
+          soundToggle.style.opacity = "0.45";
+          soundToggle.style.cursor = "not-allowed";
+          if (lockedIcon) lockedIcon.style.display = "block";
+          if (silenceIcon) silenceIcon.style.display = "none";
+          if (silenceLabel) silenceLabel.style.display = "none";
+          soundToggle.classList.remove("alert-pulse");
         }
       }
 
-      function toggleMute() {
-        isMuted = !isMuted;
-        localStorage.setItem('monitor_muted', String(isMuted));
-        initSoundSettings();
-        
-        // Pequeño feedback de sonido para saber que se activó
-        if (!isMuted) {
-          playChime();
-        }
+      function startAlertLoop() {
+        if (_alertLoopInterval) return;
+        if (_alertSilenced) return;
+
+        playChime();
+        _alertLoopInterval = setInterval(() => {
+          if (!_alertSilenced) playChime();
+        }, 8000);
+
+        _setAlarmMode(true);
       }
+
+      function stopAlertLoop() {
+        if (_alertLoopInterval) {
+          clearInterval(_alertLoopInterval);
+          _alertLoopInterval = null;
+        }
+        _setAlarmMode(false);
+      }
+
+      function silenceAlert() {
+        _alertSilenced = true;
+        stopAlertLoop();
+      }
+
 
       // Conexión a Pusher para Tiempo Real
       function setupPusherConnection() {
         const config = (window as any).PUSHER_CONFIG;
 
         if (!config || !config.key) {
-          console.warn('Pusher no está configurado. Se activará Polling automático de respaldo.');
-          updateConnectionStatus('connecting', 'Polling activo (sin Pusher)');
-          
+          console.warn(
+            "Pusher no está configurado. Se activará Polling automático de respaldo.",
+          );
+          updateConnectionStatus("connecting", "Polling activo (sin Pusher)");
+
           // Polling como fallback cada 15 segundos si no hay Pusher
           startPolling(600000);
           return;
         }
 
         try {
-          updateConnectionStatus('connecting', 'Conectando...');
-          
+          updateConnectionStatus("connecting", "Conectando...");
+
           const pusher = new Pusher(config.key, {
             cluster: config.cluster,
-            forceTLS: true
+            forceTLS: true,
           });
 
-          const channel = pusher.subscribe('orders-channel');
+          const channel = pusher.subscribe("orders-channel");
 
-          pusher.connection.bind('connected', () => {
-            updateConnectionStatus('connected', 'En Vivo (Websockets)');
+          pusher.connection.bind("connected", () => {
+            updateConnectionStatus("connected", "En Vivo (Websockets)");
             // Si teníamos un poll de respaldo activo, lo detenemos
             stopPolling();
             // Además activamos un poll largo (ej. cada 90s) para asegurar sincronía de datos general
             startPolling(90000);
           });
 
-          pusher.connection.bind('disconnected', () => {
-            updateConnectionStatus('disconnected', 'Desconectado');
+          pusher.connection.bind("disconnected", () => {
+            updateConnectionStatus("disconnected", "Desconectado");
             startPolling(600000); // Polling rápido si se cae la conexión
           });
 
-          pusher.connection.bind('failed', () => {
-            updateConnectionStatus('disconnected', 'Conexión Fallida');
+          pusher.connection.bind("failed", () => {
+            updateConnectionStatus("disconnected", "Conexión Fallida");
             startPolling(600000);
           });
 
           // Manejar eventos de pedido creado
-          channel.bind('order-created', (data) => {
-            console.log('Nuevo pedido recibido por Pusher:', data);
-            
+          channel.bind("order-created", (data) => {
+            console.log("Nuevo pedido recibido por Pusher:", data);
+
             // Añadir al inicio si no existe ya
-            if (!orders.some(o => o.id === data.id)) {
-              // El payload de Pusher puede venir resumido o completo. 
+            if (!orders.some((o) => o.id === data.id)) {
+              // El payload de Pusher puede venir resumido o completo.
               // Si viene completo o el que enviamos en src/lib/pusher.ts
               const newOrder = data.order || data;
               orders.unshift(newOrder);
-              
+
               // Marcar la tarjeta visualmente para resaltar
               newOrder._isNew = true;
-              
+
               renderOrders();
               updateStats();
               playChime();
-              showToast(`¡Nuevo pedido recibido! #${newOrder.number}`, 'success');
+              showToast(
+                `¡Nuevo pedido recibido! #${newOrder.number}`,
+                "success",
+              );
             }
           });
 
           // Manejar eventos de pedido actualizado
-          channel.bind('order-updated', (data) => {
-            console.log('Pedido actualizado recibido por Pusher:', data);
-            
+          channel.bind("order-updated", (data) => {
+            console.log("Pedido actualizado recibido por Pusher:", data);
+
             const updatedOrder = data.order || data;
-            const index = orders.findIndex(o => o.id === updatedOrder.id);
-            
+            const index = orders.findIndex((o) => o.id === updatedOrder.id);
+
             if (index !== -1) {
               const oldStatus = orders[index].status;
               orders[index] = { ...orders[index], ...updatedOrder };
-              
+
               // Si el estado cambió, mostrar toast informativo
               if (oldStatus !== updatedOrder.status) {
-                showToast(`Pedido #${updatedOrder.number} cambió de "${translateStatus(oldStatus)}" a "${translateStatus(updatedOrder.status)}"`, 'info');
+                showToast(
+                  `Pedido #${updatedOrder.number} cambió de "${translateStatus(oldStatus)}" a "${translateStatus(updatedOrder.status)}"`,
+                  "info",
+                );
               }
-              
+
               renderOrders();
               updateStats();
             } else {
@@ -414,10 +598,9 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
               updateStats();
             }
           });
-
         } catch (error) {
-          console.error('Error al inicializar Pusher:', error);
-          updateConnectionStatus('disconnected', 'Error de Tiempo Real');
+          console.error("Error al inicializar Pusher:", error);
+          updateConnectionStatus("disconnected", "Error de Tiempo Real");
           startPolling(600000);
         }
       }
@@ -425,23 +608,25 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
       function startPolling(ms) {
         stopPolling();
         pollInterval = setInterval(async () => {
-          console.log('Ejecutando actualización en segundo plano (Polling)...');
+          console.log("Ejecutando actualización en segundo plano (Polling)...");
           try {
-            const response = await fetch('/api/orders');
+            const response = await fetch("/api/orders");
             const data = await response.json();
             if (data.success && Array.isArray(data.orders)) {
               // Comparar si hay nuevos pedidos para emitir alarma
-              const hasNew = data.orders.some(newO => !orders.some(oldO => oldO.id === newO.id));
+              const hasNew = data.orders.some(
+                (newO) => !orders.some((oldO) => oldO.id === newO.id),
+              );
               orders = data.orders;
               renderOrders();
               updateStats();
               if (hasNew) {
                 playChime();
-                showToast('Nuevos pedidos detectados.', 'success');
+                showToast("Nuevos pedidos detectados.", "success");
               }
             }
           } catch (err) {
-            console.error('Error en el auto-polling:', err);
+            console.error("Error en el auto-polling:", err);
           }
         }, ms);
       }
@@ -457,7 +642,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
       function updateConnectionStatus(state, labelText) {
         if (!connectionStatus) return;
         connectionStatus.className = `connection-badge ${state}`;
-        const labelEl = connectionStatus.querySelector('.label');
+        const labelEl = connectionStatus.querySelector(".label");
         if (labelEl) labelEl.textContent = labelText;
       }
 
@@ -467,16 +652,24 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
 
         // Filtrar pedidos
         let filteredOrders = orders;
-        
-        if (activeFilter !== 'all') {
-          filteredOrders = filteredOrders.filter(o => o.status === activeFilter);
+
+        if (activeFilter !== "all") {
+          filteredOrders = filteredOrders.filter(
+            (o) => o.status === activeFilter,
+          );
         }
 
         if (searchQuery) {
-          filteredOrders = filteredOrders.filter(o => {
-            const num = o.number ? o.number.toString() : '';
-            const name = (o.billing?.first_name || '') + ' ' + (o.billing?.last_name || '');
-            return num.includes(searchQuery) || name.toLowerCase().includes(searchQuery);
+          filteredOrders = filteredOrders.filter((o) => {
+            const num = o.number ? o.number.toString() : "";
+            const name =
+              (o.billing?.first_name || "") +
+              " " +
+              (o.billing?.last_name || "");
+            return (
+              num.includes(searchQuery) ||
+              name.toLowerCase().includes(searchQuery)
+            );
           });
         }
 
@@ -491,33 +684,40 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
           return;
         }
 
-        ordersGrid.innerHTML = filteredOrders.map(order => {
-          const formattedDate = formatDate(order.date_created);
-          const name = `${order.billing?.first_name || 'Sin'} ${order.billing?.last_name || 'Nombre'}`;
-          const statusClass = `status-${order.status}`;
-          const statusText = translateStatus(order.status);
-          const pulseClass = order._isNew ? 'new-order-pulse' : '';
+        ordersGrid.innerHTML = filteredOrders
+          .map((order) => {
+            const formattedDate = formatDate(order.date_created);
+            const name = `${order.billing?.first_name || "Sin"} ${order.billing?.last_name || "Nombre"}`;
+            const statusClass = `status-${order.status}`;
+            const statusText = translateStatus(order.status);
+            const pulseClass = order._isNew ? "new-order-pulse" : "";
 
-          // Generar filas de productos (máximo 3 en tarjeta para no colapsar)
-          const itemsToDisplay = order.line_items || [];
-          const itemsHtml = itemsToDisplay.slice(0, 3).map(item => `
+            // Generar filas de productos (máximo 3 en tarjeta para no colapsar)
+            const itemsToDisplay = order.line_items || [];
+            const itemsHtml = itemsToDisplay
+              .slice(0, 3)
+              .map(
+                (item) => `
             <div class="order-item-row">
               <span class="order-item-name">${item.name}</span>
               <span class="order-item-qty">x${item.quantity}</span>
             </div>
-          `).join('');
+          `,
+              )
+              .join("");
 
-          const extraItemsCount = itemsToDisplay.length - 3;
-          const extraHtml = extraItemsCount > 0 
-            ? `<div style="text-align: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">+ ${extraItemsCount} producto(s) más</div>`
-            : '';
+            const extraItemsCount = itemsToDisplay.length - 3;
+            const extraHtml =
+              extraItemsCount > 0
+                ? `<div style="text-align: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">+ ${extraItemsCount} producto(s) más</div>`
+                : "";
 
-          return `
+            return `
             <article class="order-card glass ${pulseClass}" data-id="${order.id}">
       <!-- Imagen de portada del pedido -->
       <div class="order-card-image-wrapper">
-        <img src="${order.line_items?.[0]?.image?.src || ''}" alt="${order.line_items?.[0]?.name || 'Producto'}" class="order-card-image" />
-        <button class="zoom-btn" data-src="${order.line_items?.[0]?.image?.src || ''}" aria-label="Ver imagen en grande"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+        <img src="${order.line_items?.[0]?.image?.src || ""}" alt="${order.line_items?.[0]?.name || "Producto"}" class="order-card-image" />
+        <button class="zoom-btn" data-src="${order.line_items?.[0]?.image?.src || ""}" aria-label="Ver imagen en grande"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
       </div>
               <div class="order-header">
                 <div>
@@ -540,30 +740,36 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
               <div class="order-footer">
                 <div>
                   <div class="order-total-label">Total</div>
-                  <div class="order-total">${order.total != null ? `$${parseFloat(order.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '-'} </div>
+                  <div class="order-total">${order.total != null ? `$${parseFloat(order.total).toLocaleString("es-MX", { minimumFractionDigits: 2 })}` : "-"} </div>
                 </div>
                 
                 <div class="actions" style="display: flex; gap: 0.5rem; align-items: center;">
                   <select class="card-status-select" data-id="${order.id}">
-                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pendiente</option>
-                    <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Procesando</option>
-                    <option value="on-hold" ${order.status === 'on-hold' ? 'selected' : ''}>En Espera</option>
-                    <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completado</option>
-                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelado</option>
+                    <option value="pending" ${order.status === "pending" ? "selected" : ""}>Pendiente</option>
+                    <option value="processing" ${order.status === "processing" ? "selected" : ""}>Procesando</option>
+                    <option value="on-hold" ${order.status === "on-hold" ? "selected" : ""}>En Espera</option>
+                    <option value="completed" ${order.status === "completed" ? "selected" : ""}>Completado</option>
+                    <option value="cancelled" ${order.status === "cancelled" ? "selected" : ""}>Cancelado</option>
                   </select>
                   <button class="quick-status-btn" data-id="${order.id}" data-action="view">Detalles</button>
                 </div>
               </div>
             </article>
           `;
-        }).join('');
+          })
+          .join("");
 
         // Añadir escuchadores de clic a las tarjetas
-        document.querySelectorAll('.order-card').forEach(card => {
-          card.addEventListener('click', (e) => {
+        document.querySelectorAll(".order-card").forEach((card) => {
+          card.addEventListener("click", (e) => {
             const target = e.target as HTMLElement;
             // Evitar abrir modal si se hace clic en botones de acción específicos o en el select
-            if (target.tagName === 'BUTTON' || target.closest('button') || target.tagName === 'SELECT') return;
+            if (
+              target.tagName === "BUTTON" ||
+              target.closest("button") ||
+              target.tagName === "SELECT"
+            )
+              return;
 
             const orderId = (card as HTMLElement).dataset.id;
             openOrderDetails(Number(orderId));
@@ -571,25 +777,27 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         });
 
         // Evento para el botón de "Detalles"
-        document.querySelectorAll('.quick-status-btn[data-action="view"]').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const orderId = (btn as HTMLElement).dataset.id;
-            openOrderDetails(Number(orderId));
+        document
+          .querySelectorAll('.quick-status-btn[data-action="view"]')
+          .forEach((btn) => {
+            btn.addEventListener("click", (e) => {
+              const orderId = (btn as HTMLElement).dataset.id;
+              openOrderDetails(Number(orderId));
+            });
           });
-        });
 
         // Evento para cambiar de estado directamente desde la tarjeta
-        document.querySelectorAll('.card-status-select').forEach(select => {
-          select.addEventListener('change', async (e) => {
+        document.querySelectorAll(".card-status-select").forEach((select) => {
+          select.addEventListener("change", async (e) => {
             const target = e.currentTarget as HTMLSelectElement;
             const orderId = Number(target.dataset.id);
             const newStatus = target.value;
-            
+
             // Deshabilitar temporalmente mientras se realiza la petición
             target.disabled = true;
-            
+
             await updateOrderStatus(orderId, newStatus);
-            
+
             // El renderizado de pedidos ya actualizará el estado de habilitación
           });
         });
@@ -597,7 +805,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
 
       // Abrir modal con detalles del pedido
       function openOrderDetails(orderId) {
-        const order = orders.find(o => o.id === orderId);
+        const order = orders.find((o) => o.id === orderId);
         if (!order || !modalBody) return;
 
         // Si el pedido era nuevo, remover la etiqueta de nuevo al abrir los detalles
@@ -608,47 +816,67 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         }
 
         const formattedDate = formatDate(order.date_created);
-        const name = `${order.billing?.first_name || ''} ${order.billing?.last_name || ''}`;
-        const itemsHtml = order.line_items.map(item => `
+        const name = `${order.billing?.first_name || ""} ${order.billing?.last_name || ""}`;
+        const itemsHtml = order.line_items
+          .map(
+            (item) => `
           <tr>
-            <td><img src="${item.image?.src || ''}" alt="${item.name}" style="width:40px;height:auto;margin-right:8px;vertical-align:middle;"/>${item.name}</td>
+            <td><img src="${item.image?.src || ""}" alt="${item.name}" style="width:40px;height:auto;margin-right:8px;vertical-align:middle;"/>${item.name}</td>
             <td style="text-align: center;">${item.quantity}</td>
-            <td style="text-align: right;">${item.total != null ? `$${parseFloat(item.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '-'} </td>
+            <td style="text-align: right;">${item.total != null ? `$${parseFloat(item.total).toLocaleString("es-MX", { minimumFractionDigits: 2 })}` : "-"} </td>
           </tr>
-        `).join('');
+        `,
+          )
+          .join("");
 
-        const noteHtml = order.customer_note 
+        const noteHtml = order.customer_note
           ? `
             <div class="modal-section">
               <h3>Nota del Cliente</h3>
               <div class="modal-note-box">${order.customer_note}</div>
             </div>
-          ` 
-          : '';
+          `
+          : "";
 
         // Generar botones de acciones rápidas de cambio de estado
         const actionPanelHtml = `
           <div class="status-change-panel">
-            ${order.status !== 'processing' ? `
+            ${
+              order.status !== "processing"
+                ? `
               <button class="btn-status-change to-processing" data-action-status="processing" data-id="${order.id}">
                 ⚙️ Marcar en Proceso
               </button>
-            ` : ''}
-            ${order.status !== 'completed' ? `
+            `
+                : ""
+            }
+            ${
+              order.status !== "completed"
+                ? `
               <button class="btn-status-change to-completed" data-action-status="completed" data-id="${order.id}">
                 ✅ Completar Pedido
               </button>
-            ` : ''}
-            ${order.status !== 'on-hold' ? `
+            `
+                : ""
+            }
+            ${
+              order.status !== "on-hold"
+                ? `
               <button class="btn-status-change to-on-hold" data-action-status="on-hold" data-id="${order.id}">
                 ⏳ Poner en Espera
               </button>
-            ` : ''}
-            ${order.status !== 'cancelled' && order.status !== 'completed' ? `
+            `
+                : ""
+            }
+            ${
+              order.status !== "cancelled" && order.status !== "completed"
+                ? `
               <button class="btn-status-change to-cancelled" data-action-status="cancelled" data-id="${order.id}">
                 ❌ Cancelar
               </button>
-            ` : ''}
+            `
+                : ""
+            }
           </div>
         `;
 
@@ -659,23 +887,23 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
               <span class="status-badge status-${order.status}">${translateStatus(order.status)}</span>
             </h2>
             <div style="font-size: 0.9rem; color: var(--text-muted); margin-top: -1rem; margin-bottom: 1.5rem;">
-              Creado el ${formattedDate} | Método de pago: ${order.payment_method_title || 'N/A'}
+              Creado el ${formattedDate} | Método de pago: ${order.payment_method_title || "N/A"}
             </div>
 
             <div class="modal-section modal-grid-2">
               <div class="address-block">
                 <h3>Datos del Cliente</h3>
                 <p><strong>Nombre:</strong> ${name}</p>
-                <p><strong>Email:</strong> <a href="mailto:${order.billing?.email}" style="color: var(--primary); text-decoration: none;">${order.billing?.email || 'N/A'}</a></p>
-                <p><strong>Teléfono:</strong> <a href="tel:${order.billing?.phone}" style="color: var(--primary); text-decoration: none;">${order.billing?.phone || 'N/A'}</a></p>
+                <p><strong>Email:</strong> <a href="mailto:${order.billing?.email}" style="color: var(--primary); text-decoration: none;">${order.billing?.email || "N/A"}</a></p>
+                <p><strong>Teléfono:</strong> <a href="tel:${order.billing?.phone}" style="color: var(--primary); text-decoration: none;">${order.billing?.phone || "N/A"}</a></p>
               </div>
 
               <div class="address-block">
                 <h3>Dirección de Envío</h3>
-                <p>${order.shipping?.address_1 || order.billing?.address_1 || 'No especificada'}</p>
-                <p>${order.shipping?.address_2 || order.billing?.address_2 || ''}</p>
-                <p>${order.shipping?.city || order.billing?.city || ''}, ${order.shipping?.state || order.billing?.state || ''}</p>
-                <p>C.P. ${order.shipping?.postcode || order.billing?.postcode || ''}</p>
+                <p>${order.shipping?.address_1 || order.billing?.address_1 || "No especificada"}</p>
+                <p>${order.shipping?.address_2 || order.billing?.address_2 || ""}</p>
+                <p>${order.shipping?.city || order.billing?.city || ""}, ${order.shipping?.state || order.billing?.state || ""}</p>
+                <p>C.P. ${order.shipping?.postcode || order.billing?.postcode || ""}</p>
               </div>
             </div>
 
@@ -698,7 +926,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
               
               <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1rem;">
                 <span style="font-weight: 600;">Total del Pedido</span>
-                <span class="order-total" style="font-size: 1.5rem;">${order.total != null ? `$${parseFloat(order.total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}` : '-'} </span>
+                <span class="order-total" style="font-size: 1.5rem;">${order.total != null ? `$${parseFloat(order.total).toLocaleString("es-MX", { minimumFractionDigits: 2 })}` : "-"} </span>
               </div>
             </div>
 
@@ -710,8 +938,8 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
         `;
 
         // Añadir escuchadores para el cambio de estado
-        modalBody.querySelectorAll('.btn-status-change').forEach(btn => {
-          btn.addEventListener('click', async (e) => {
+        modalBody.querySelectorAll(".btn-status-change").forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
             const target = e.currentTarget as HTMLButtonElement;
             const targetStatus = target.dataset.actionStatus;
             const oId = Number(target.dataset.id);
@@ -725,87 +953,207 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
           });
         });
 
-        orderModal.classList.add('active');
+        orderModal.classList.add("active");
       }
 
       function closeModal() {
-        orderModal.classList.remove('active');
+        orderModal.classList.remove("active");
       }
 
       // Llamar al endpoint local para cambiar el estado del pedido
       async function updateOrderStatus(orderId, status) {
         try {
-          const response = await fetch('/api/update-status', {
-            method: 'POST',
+          const response = await fetch("/api/update-status", {
+            method: "POST",
             headers: {
-              'Content-Type': 'application/json'
+              "Content-Type": "application/json",
             },
-            body: JSON.stringify({ orderId, status })
+            body: JSON.stringify({ orderId, status }),
           });
 
           const data = await response.json();
 
           if (data.success && data.order) {
             // Actualizar localmente el pedido
-            const index = orders.findIndex(o => o.id === orderId);
+            const index = orders.findIndex((o) => o.id === orderId);
             if (index !== -1) {
               orders[index] = { ...data.order, _isNew: false };
               renderOrders();
               updateStats();
             }
-            showToast(`Pedido #${data.order.number} actualizado con éxito.`, 'success');
+            showToast(
+              `Pedido #${data.order.number} actualizado con éxito.`,
+              "success",
+            );
           } else {
-            showToast('Error al actualizar el estado: ' + (data.error || 'Intenta de nuevo'), 'danger');
+            showToast(
+              "Error al actualizar el estado: " +
+                (data.error || "Intenta de nuevo"),
+              "danger",
+            );
           }
         } catch (error) {
-          showToast('Error de red al actualizar estado del pedido.', 'danger');
+          showToast("Error de red al actualizar estado del pedido.", "danger");
           console.error(error);
         }
       }
 
       // Actualizar Contadores de Estadísticas
+      // Tab badge: título animado + favicon dinámico
+      let _tabBlinkerInterval: ReturnType<typeof setInterval> | null = null;
+
+      function updateTabBadge(count: number) {
+        const baseTitle = "Monitor de Pedidos — Florea";
+
+        // Limpiar intervalo previo
+        if (_tabBlinkerInterval) {
+          clearInterval(_tabBlinkerInterval);
+          _tabBlinkerInterval = null;
+        }
+
+        if (count > 0) {
+          // Alternar entre dos estados para crear efecto de parpadeo llamativo
+          const stateA = `🌷 ${count} PENDIENTE${count !== 1 ? "s" : ""}`;
+          const stateB = `Monitor de Pedidos`;
+          let toggle = true;
+          document.title = stateA;
+
+          _tabBlinkerInterval = setInterval(() => {
+            document.title = toggle ? stateB : stateA;
+            toggle = !toggle;
+          }, 1200);
+        } else {
+          document.title = baseTitle;
+        }
+
+        // --- Favicon dinámico con Canvas ---
+        const canvas = document.createElement("canvas");
+        canvas.width = 64;
+        canvas.height = 64;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, 64, 64);
+
+        if (count > 0) {
+          // Fondo rojo vibrante con gradiente
+          const gradient = ctx.createRadialGradient(28, 28, 2, 32, 32, 36);
+          gradient.addColorStop(0, "#ff6060");
+          gradient.addColorStop(1, "#c0392b");
+          ctx.fillStyle = gradient;
+          ctx.beginPath();
+          ctx.roundRect(0, 0, 64, 64, 16);
+          ctx.fill();
+
+          // Brillo superior sutil
+          ctx.fillStyle = "rgba(255,255,255,0.18)";
+          ctx.beginPath();
+          ctx.roundRect(6, 4, 52, 24, 10);
+          ctx.fill();
+
+          // Número centrado en blanco bold
+          ctx.fillStyle = "#ffffff";
+          ctx.font = `bold ${count >= 10 ? 26 : 34}px -apple-system, system-ui, Arial`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.shadowColor = "rgba(0,0,0,0.5)";
+          ctx.shadowBlur = 6;
+          ctx.fillText(count >= 100 ? "99+" : String(count), 32, 35);
+        } else {
+          // Ícono verde: todo al día ✓
+          ctx.fillStyle = "#16a34a";
+          ctx.beginPath();
+          ctx.roundRect(0, 0, 64, 64, 16);
+          ctx.fill();
+          ctx.fillStyle = "rgba(255,255,255,0.15)";
+          ctx.beginPath();
+          ctx.roundRect(6, 4, 52, 24, 10);
+          ctx.fill();
+          ctx.strokeStyle = "#ffffff";
+          ctx.lineWidth = 7;
+          ctx.lineCap = "round";
+          ctx.lineJoin = "round";
+          ctx.shadowColor = "rgba(0,0,0,0.3)";
+          ctx.shadowBlur = 4;
+          ctx.beginPath();
+          ctx.moveTo(14, 35);
+          ctx.lineTo(26, 47);
+          ctx.lineTo(50, 20);
+          ctx.stroke();
+        }
+
+        // Reemplazar favicon
+        let link = document.querySelector(
+          "link[rel='icon']",
+        ) as HTMLLinkElement;
+        if (!link) {
+          link = document.createElement("link");
+          link.rel = "icon";
+          document.head.appendChild(link);
+        }
+        link.type = "image/png";
+        link.href = canvas.toDataURL("image/png");
+      }
+
       function updateStats() {
-        const totalEl = document.querySelector('#statTotal .value');
-        const pendingEl = document.querySelector('#statPending .value');
-        const processingEl = document.querySelector('#statProcessing .value');
-        const onHoldEl = document.querySelector('#statOnHold .value');
-        const completedEl = document.querySelector('#statCompleted .value');
+        const totalEl = document.querySelector("#statTotal .value");
+        const pendingEl = document.querySelector("#statPending .value");
+        const processingEl = document.querySelector("#statProcessing .value");
+        const onHoldEl = document.querySelector("#statOnHold .value");
+        const completedEl = document.querySelector("#statCompleted .value");
 
         if (!totalEl) return;
 
         const stats = {
           total: orders.length,
-          pending: orders.filter(o => o.status === 'pending').length,
-          processing: orders.filter(o => o.status === 'processing').length,
-          'on-hold': orders.filter(o => o.status === 'on-hold').length,
-          completed: orders.filter(o => o.status === 'completed').length,
+          pending: orders.filter((o) => o.status === "pending").length,
+          processing: orders.filter((o) => o.status === "processing").length,
+          "on-hold": orders.filter((o) => o.status === "on-hold").length,
+          completed: orders.filter((o) => o.status === "completed").length,
         };
 
         totalEl.textContent = String(stats.total);
         pendingEl.textContent = String(stats.pending);
         processingEl.textContent = String(stats.processing);
-        onHoldEl.textContent = String(stats['on-hold']);
+        onHoldEl.textContent = String(stats["on-hold"]);
         completedEl.textContent = String(stats.completed);
+
+        // Badge de pestaña: pedidos que aún requieren atención
+        const activeCount = stats.pending + stats.processing + stats["on-hold"];
+        updateTabBadge(activeCount);
+
+        if (activeCount > 0) {
+          if (!_alertLoopInterval && !_alertSilenced) {
+            startAlertLoop();
+          } else if (!_alertLoopInterval && _alertSilenced) {
+            // Silenciado por el usuario: mantener botón en modo alarma (sin loop)
+            _setAlarmMode(true);
+          }
+        } else {
+          // Sin pedidos activos: detener loop y resetear silencio para la próxima vez
+          _alertSilenced = false;
+          stopAlertLoop();
+        }
       }
 
       // Mostrar alertas en el monitor (Toasts)
-      function showToast(message, type = 'info') {
+      function showToast(message, type = "info") {
         if (!toastContainer) return;
 
-        const toast = document.createElement('div');
+        const toast = document.createElement("div");
         toast.className = `toast glass`;
-        
-        let icon = 'ℹ️';
-        let borderColor = 'rgba(255,255,255,0.1)';
-        if (type === 'success') {
-          icon = '✅';
-          borderColor = 'var(--success)';
-        } else if (type === 'danger') {
-          icon = '❌';
-          borderColor = 'var(--danger)';
-        } else if (type === 'info') {
-          icon = '🔔';
-          borderColor = 'var(--primary)';
+
+        let icon = "ℹ️";
+        let borderColor = "rgba(255,255,255,0.1)";
+        if (type === "success") {
+          icon = "✅";
+          borderColor = "var(--success)";
+        } else if (type === "danger") {
+          icon = "❌";
+          borderColor = "var(--danger)";
+        } else if (type === "info") {
+          icon = "🔔";
+          borderColor = "var(--primary)";
         }
 
         toast.style.borderLeft = `4px solid ${borderColor}`;
@@ -818,7 +1166,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
 
         // Remover automáticamente a los 4 segundos
         setTimeout(() => {
-          toast.style.animation = 'slide-in 0.3s ease-in reverse forwards';
+          toast.style.animation = "slide-in 0.3s ease-in reverse forwards";
           setTimeout(() => {
             toast.remove();
           }, 300);
@@ -840,14 +1188,14 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
 
       // Helper para formatear fechas de WooCommerce (ISO-8601 a bonito)
       function formatDate(dateString) {
-        if (!dateString) return 'N/A';
+        if (!dateString) return "N/A";
         try {
           const date = new Date(dateString);
-          return date.toLocaleDateString('es-MX', {
-            day: '2-digit',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit'
+          return date.toLocaleDateString("es-MX", {
+            day: "2-digit",
+            month: "short",
+            hour: "2-digit",
+            minute: "2-digit",
           });
         } catch {
           return dateString;
@@ -857,47 +1205,51 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || '';
       // Traducir estados a Español
       function translateStatus(status) {
         const statuses = {
-          'pending': 'Pendiente',
-          'processing': 'Procesando',
-          'on-hold': 'En espera',
-          'completed': 'Completado',
-          'cancelled': 'Cancelado',
-          'refunded': 'Reembolsado',
-          'failed': 'Fallido',
-          'trash': 'Papelera'
+          pending: "Pendiente",
+          processing: "Procesando",
+          "on-hold": "En espera",
+          completed: "Completado",
+          cancelled: "Cancelado",
+          refunded: "Reembolsado",
+          failed: "Fallido",
+          trash: "Papelera",
         };
         return statuses[status] || status;
       }
 
       // Lightbox functionality for order card images
-      document.addEventListener('click', (e) => {
+      document.addEventListener("click", (e) => {
         const target = e.target as HTMLElement;
-        const zoomBtn = target.closest('.zoom-btn') as HTMLElement;
+        const zoomBtn = target.closest(".zoom-btn") as HTMLElement;
         if (zoomBtn) {
           e.stopPropagation();
           const src = zoomBtn.dataset.src;
-          const lightbox = document.getElementById('image-lightbox');
+          const lightbox = document.getElementById("image-lightbox");
           if (lightbox && src) {
-            const img = lightbox.querySelector('img') as HTMLImageElement;
+            const img = lightbox.querySelector("img") as HTMLImageElement;
             if (img) {
               img.src = src;
               lightbox.hidden = false;
               // Prevent body scrolling while modal is open
-              document.body.style.overflow = 'hidden';
+              document.body.style.overflow = "hidden";
             }
           }
-        } else if (target.id === 'image-lightbox' || target.closest('#image-lightbox') && !target.closest('.lightbox-img')) {
+        } else if (
+          target.id === "image-lightbox" ||
+          (target.closest("#image-lightbox") &&
+            !target.closest(".lightbox-img"))
+        ) {
           // Close when clicking outside the image
-          const lightbox = document.getElementById('image-lightbox');
+          const lightbox = document.getElementById("image-lightbox");
           if (lightbox) {
             lightbox.hidden = true;
-            document.body.style.overflow = '';
+            document.body.style.overflow = "";
           }
         }
       });
     </script>
-  <div id="image-lightbox" class="image-lightbox" hidden>
-    <img src="" alt="Imagen ampliada" class="lightbox-img" />
-  </div>
+    <div id="image-lightbox" class="image-lightbox" hidden>
+      <img src="" alt="Imagen ampliada" class="lightbox-img" />
+    </div>
   </body>
 </html>
