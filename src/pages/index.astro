@@ -80,6 +80,12 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
           <span id="silenceLabel" style="display: none; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.03em;">Silenciar</span>
         </button>
 
+        <!-- Indicador de estado de conexión -->
+        <div id="connectionStatus" class="connection-badge disconnected">
+          <span class="dot"></span>
+          <span class="label">Desconectado</span>
+        </div>
+
         <!-- Botón de Recarga Manual -->
         <button id="refreshBtn" class="btn-icon glass" title="Recargar Pedidos">
           <svg
