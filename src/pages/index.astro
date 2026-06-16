@@ -15,6 +15,39 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
     <title>Monitor de Pedidos - Florea</title>
   </head>
   <body>
+
+
+    <!-- Modal de Permiso de Audio (por bloqueo de autoplay) -->
+    <div id="audioPermissionModal" class="modal-overlay">
+      <div class="modal-content glass" style="max-width: 460px; padding: 2.25rem;">
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <div class="audio-modal-icon-wrapper" style="font-size: 3rem; margin-bottom: 1rem; display: inline-block; animation: banner-wiggle 1.5s infinite;">🔔</div>
+          <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--text-primary);">Activar Sonido de Alertas</h2>
+          <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.5; margin-bottom: 0.5rem;">
+            Para reproducir la alarma sonora automáticamente al recibir pedidos, el navegador requiere una confirmación de sonido.
+          </p>
+        </div>
+
+        <div class="audio-instructions-box" style="background: rgba(0, 0, 0, 0.03); border: 1px solid var(--card-border); padding: 1.25rem; border-radius: 16px; margin-bottom: 1.75rem; font-size: 0.85rem; line-height: 1.6;">
+          <div style="font-weight: 700; margin-bottom: 0.6rem; color: var(--primary); display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem;">
+            ⚙️ Paso recomendado (evita clics futuros):
+          </div>
+          <ol style="margin-left: 1.25rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.5rem;">
+            <li>Haz clic en el candado 🔒 o ajustes al lado de la URL.</li>
+            <li>Selecciona <strong>"Configuración del sitio"</strong> (o Site Settings).</li>
+            <li>Busca la opción <strong>"Sonido"</strong> (o Sound) en la lista.</li>
+            <li>Cambia su valor a <strong>"Permitir"</strong>.</li>
+          </ol>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <button id="activateAudioBtn" class="btn-primary" style="width: 100%; justify-content: center; padding: 0.9rem; font-weight: 700; border-radius: 12px; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; font-size: 0.95rem; box-shadow: 0 4px 12px var(--primary-glow); transition: var(--transition-smooth);">
+            🔊 Activar Alertas de Sonido
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Encabezado -->
     <header class="glass">
       <div class="logo-section">
@@ -238,7 +271,6 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
       let orders = [];
       let activeFilter = "all";
       let searchQuery = "";
-      let isMuted = localStorage.getItem("monitor_muted") === "true";
       let pollInterval = null;
 
       // Estado de la alarma de pedidos activos
@@ -402,14 +434,53 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
         }
       }
 
+      // --- Desbloqueo de Audio por Políticas de Autoplay ---
+      function showAudioUnlockModal() {
+        const modal = document.getElementById("audioPermissionModal");
+        if (modal) {
+          modal.classList.add("active");
+        }
+
+        const activateBtn = document.getElementById("activateAudioBtn");
+        if (activateBtn) {
+          activateBtn.addEventListener("click", unlockAudio);
+        }
+      }
+
+      function hideAudioUnlockModal() {
+        const modal = document.getElementById("audioPermissionModal");
+        if (modal) {
+          modal.classList.remove("active");
+        }
+      }
+
+      function unlockAudio() {
+        const tempCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        if (tempCtx.state === "running") {
+          hideAudioUnlockModal();
+          playChime();
+        } else {
+          tempCtx.resume().then(() => {
+            if (tempCtx.state === "running") {
+              hideAudioUnlockModal();
+              playChime();
+            }
+          });
+        }
+      }
+
       // Configuración del Web Audio API para reproducir sonido de alerta
       function playChime() {
-        if (isMuted) return;
-
         try {
           const ctx = new (
             window.AudioContext || (window as any).webkitAudioContext
           )();
+
+          if (ctx.state === "suspended") {
+            showAudioUnlockModal();
+            return;
+          }
+
           const playTone = (freq, startTime, duration) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
