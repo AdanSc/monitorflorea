@@ -68,6 +68,11 @@ export interface WooCommerceOrder {
   payment_method_title: string;
   transaction_id: string;
   customer_note: string;
+  meta_data?: Array<{
+    id?: number;
+    key: string;
+    value: any;
+  }>;
   line_items: Array<{
     id: number;
     name: string;
@@ -80,6 +85,17 @@ export interface WooCommerceOrder {
     total: string;
     total_tax: string;
     price: number;
+    image?: {
+      id?: number;
+      src?: string;
+    };
+    meta_data?: Array<{
+      id?: number;
+      key: string;
+      value: any;
+      display_key?: string;
+      display_value?: any;
+    }>;
   }>;
 }
 

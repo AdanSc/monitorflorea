@@ -450,6 +450,133 @@ header {
   color: var(--primary);
 }
 
+/* Banners de Requerimiento Especial en Tarjeta (Banda / Tarjeta) */
+.order-custom-banners {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.15rem;
+  margin-bottom: 0.85rem;
+}
+
+.custom-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+}
+
+.custom-banner.is-tarjeta {
+  background: linear-gradient(135deg, rgba(253, 242, 248, 0.95) 0%, rgba(252, 231, 243, 0.6) 100%);
+  border-color: rgba(244, 114, 182, 0.35);
+  box-shadow: 0 2px 6px rgba(244, 114, 182, 0.06);
+}
+.custom-banner.is-tarjeta:hover {
+  background: linear-gradient(135deg, rgba(253, 242, 248, 1) 0%, rgba(251, 207, 232, 0.75) 100%);
+  border-color: rgba(236, 72, 153, 0.55);
+  box-shadow: 0 4px 12px rgba(236, 72, 153, 0.12);
+  transform: translateY(-1px);
+}
+
+.custom-banner.is-banda {
+  background: linear-gradient(135deg, rgba(254, 252, 232, 0.95) 0%, rgba(254, 243, 199, 0.6) 100%);
+  border-color: rgba(245, 158, 11, 0.35);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.06);
+}
+.custom-banner.is-banda:hover {
+  background: linear-gradient(135deg, rgba(254, 252, 232, 1) 0%, rgba(253, 230, 138, 0.75) 100%);
+  border-color: rgba(217, 119, 6, 0.55);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.12);
+  transform: translateY(-1px);
+}
+
+.banner-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.banner-icon-box {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.custom-banner.is-tarjeta .banner-icon-box {
+  background: #fce7f3;
+  color: #db2777;
+}
+.custom-banner.is-banda .banner-icon-box {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.banner-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.banner-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.custom-banner.is-tarjeta .banner-title {
+  color: #9d174d;
+}
+.custom-banner.is-banda .banner-title {
+  color: #92400e;
+}
+
+.banner-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.2;
+  margin-top: 0.1rem;
+}
+
+.banner-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  background: #ffffff;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.custom-banner.is-tarjeta .banner-action {
+  color: #db2777;
+  border: 1px solid rgba(244, 114, 182, 0.3);
+}
+.custom-banner.is-banda .banner-action {
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.custom-banner:hover .banner-action {
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+.custom-banner:hover .banner-action svg {
+  transform: translateX(2px);
+}
+.banner-action svg {
+  transition: transform 0.2s ease;
+}
+
 .order-footer {
   display: flex;
   justify-content: space-between;
@@ -597,6 +724,13 @@ header {
   text-transform: uppercase;
   margin-bottom: 0.75rem;
   letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.modal-section h3 svg {
+  flex-shrink: 0;
+  stroke: var(--text-muted);
 }
 
 .modal-grid-2 {
@@ -610,6 +744,90 @@ header {
   color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 0.25rem;
+}
+
+/* Mensajes Personalizados en Modal de Detalles */
+.modal-custom-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.modal-custom-message-card {
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  position: relative;
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+}
+
+.modal-custom-message-card.is-tarjeta {
+  background: rgba(236, 72, 153, 0.04);
+  border-color: rgba(236, 72, 153, 0.22);
+  border-left: 4px solid #ec4899;
+}
+.modal-custom-message-card.is-tarjeta .custom-msg-badge {
+  color: #db2777;
+}
+
+.modal-custom-message-card.is-banda {
+  background: rgba(217, 119, 6, 0.04);
+  border-color: rgba(217, 119, 6, 0.22);
+  border-left: 4px solid #d97706;
+}
+.modal-custom-message-card.is-banda .custom-msg-badge {
+  color: #b45309;
+}
+
+.modal-custom-msg-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.custom-msg-product {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.custom-msg-product strong {
+  color: var(--text-secondary);
+}
+
+.copy-msg-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  border: 1px solid var(--card-border);
+  background: #ffffff;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+.copy-msg-btn:hover {
+  background: #f1f5f9;
+  color: var(--text-primary);
+  border-color: #cbd5e1;
+}
+
+.modal-custom-msg-content {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-primary);
+  font-style: italic;
+  white-space: pre-wrap;
+  word-break: break-word;
+  user-select: text;
+  background: rgba(255, 255, 255, 0.6);
+  padding: 0.65rem 0.85rem;
+  border-radius: 6px;
+  border: 1px dashed rgba(0, 0, 0, 0.08);
 }
 
 .modal-note-box {
@@ -670,10 +888,23 @@ header {
   transition: var(--transition-smooth);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
 }
+.btn-status-change svg {
+  flex-shrink: 0;
+  transition: transform 0.2s ease, stroke 0.2s ease;
+}
+
+.btn-status-change.to-processing svg { stroke: var(--primary); }
+.btn-status-change.to-completed svg { stroke: var(--success); }
+.btn-status-change.to-on-hold svg { stroke: var(--orange); }
+.btn-status-change.to-cancelled svg { stroke: var(--danger); }
+
 .btn-status-change:hover {
   background: #f8fafc;
   color: var(--text-primary);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
+}
+.btn-status-change:hover svg {
+  transform: scale(1.1);
 }
 
 .btn-status-change.to-processing:hover { border-color: var(--primary); color: var(--primary); background: rgba(79, 70, 229, 0.05); }

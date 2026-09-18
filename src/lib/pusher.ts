@@ -36,9 +36,13 @@ export async function triggerOrderUpdate(event: 'created' | 'updated', order: an
       },
       date_created: order.date_created,
       line_items: order.line_items?.map((item: any) => ({
+        id: item.id,
         name: item.name,
-        quantity: item.quantity
+        quantity: item.quantity,
+        image: item.image,
+        meta_data: item.meta_data,
       })) || [],
+      meta_data: order.meta_data,
       order: order
     });
     console.log(`Evento 'order-${event}' transmitido a Pusher para el pedido #${order.id}`);

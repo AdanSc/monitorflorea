@@ -426,6 +426,17 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
               name: "Arreglo de Tulipanes Amarillos Elegante",
               quantity: 1,
               total: "750.00",
+              meta_data: [
+                {
+                  id: 9001,
+                  key: "Mensaje para la tarjeta personalizada",
+                  value:
+                    "¡Feliz Cumpleaños Sofi! Te queremos con todo el corazón y te deseamos el mejor de los días. Con cariño, tus papás.",
+                  display_key: "Mensaje para la tarjeta personalizada",
+                  display_value:
+                    "¡Feliz Cumpleaños Sofi! Te queremos con todo el corazón y te deseamos el mejor de los días. Con cariño, tus papás.",
+                },
+              ],
             },
             {
               name: "Caja de Chocolates Trufados",
@@ -765,6 +776,125 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
         if (labelEl) labelEl.textContent = labelText;
       }
 
+      // Escapar HTML para prevenir inyección en textos de clientes
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Extraer mensajes de banda o tarjeta personalizada desde los campos de productos (Product Input Fields / WAPF)
+      function extractOrderCustomMessages(order) {
+        const messages = [];
+        const seenTexts = new Set();
+        const items = order.line_items || [];
+
+        for (const item of items) {
+          if (!item.meta_data || !Array.isArray(item.meta_data)) continue;
+
+          for (const meta of item.meta_data) {
+            const rawKey = meta.display_key || meta.key || "";
+            const keyLower = rawKey.toLowerCase();
+
+            // 1. Campos planos creados por WooCommerce desde el plugin
+            if (
+              typeof meta.value === "string" &&
+              meta.value.trim() &&
+              meta.key !== "_wapf_meta"
+            ) {
+              const isRibbon =
+                keyLower.includes("banda") ||
+                keyLower.includes("cinta") ||
+                keyLower.includes("liston") ||
+                keyLower.includes("listón");
+              const isCard =
+                keyLower.includes("tarjeta") ||
+                keyLower.includes("dedicatoria") ||
+                keyLower.includes("mensaje");
+
+              if (isRibbon || isCard) {
+                const text = meta.value.trim();
+                const dedupKey = `${isRibbon ? "b" : "t"}:${text}`;
+                if (!seenTexts.has(dedupKey)) {
+                  seenTexts.add(dedupKey);
+                  messages.push({
+                    type: isRibbon ? "banda" : "tarjeta",
+                    label: isRibbon ? "Banda Personalizada" : "Tarjeta Personalizada",
+                    text: text,
+                    productName: item.name || "",
+                  });
+                }
+              }
+            } else if (
+              meta.key === "_wapf_meta" &&
+              typeof meta.value === "object" &&
+              meta.value !== null
+            ) {
+              // 2. Respaldo directo desde estructura anidada de _wapf_meta
+              const subFields = Object.values(meta.value);
+              for (const field of subFields as any[]) {
+                if (field && typeof field.value === "string" && field.value.trim()) {
+                  const fLabel = (field.label || "").toLowerCase();
+                  const isRibbon =
+                    fLabel.includes("banda") ||
+                    fLabel.includes("cinta") ||
+                    fLabel.includes("liston") ||
+                    fLabel.includes("listón");
+                  const isCard =
+                    fLabel.includes("tarjeta") ||
+                    fLabel.includes("dedicatoria") ||
+                    fLabel.includes("mensaje");
+
+                  if (isRibbon || isCard) {
+                    const text = field.value.trim();
+                    const dedupKey = `${isRibbon ? "b" : "t"}:${text}`;
+                    if (!seenTexts.has(dedupKey)) {
+                      seenTexts.add(dedupKey);
+                      messages.push({
+                        type: isRibbon ? "banda" : "tarjeta",
+                        label: isRibbon ? "Banda Personalizada" : "Tarjeta Personalizada",
+                        text: text,
+                        productName: item.name || "",
+                      });
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // 3. Respaldo en order.meta_data de primer nivel
+        if (order.meta_data && Array.isArray(order.meta_data)) {
+          for (const meta of order.meta_data) {
+            if (typeof meta.value === "string" && meta.value.trim()) {
+              const kLower = (meta.key || "").toLowerCase();
+              const isRibbon = kLower.includes("banda") || kLower.includes("cinta");
+              const isCard = kLower.includes("tarjeta") || kLower.includes("dedicatoria");
+              if (isRibbon || isCard) {
+                const text = meta.value.trim();
+                const dedupKey = `${isRibbon ? "b" : "t"}:${text}`;
+                if (!seenTexts.has(dedupKey)) {
+                  seenTexts.add(dedupKey);
+                  messages.push({
+                    type: isRibbon ? "banda" : "tarjeta",
+                    label: isRibbon ? "Banda Personalizada" : "Tarjeta Personalizada",
+                    text: text,
+                    productName: "",
+                  });
+                }
+              }
+            }
+          }
+        }
+
+        return messages;
+      }
+
       // Renderizar el listado en la pantalla
       function renderOrders() {
         if (!ordersGrid) return;
@@ -831,6 +961,61 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
                 ? `<div style="text-align: right; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem;">+ ${extraItemsCount} producto(s) más</div>`
                 : "";
 
+            // Extraer mensajes de banda o tarjeta personalizada
+            const customMessages = extractOrderCustomMessages(order);
+            const hasBanda = customMessages.some((m) => m.type === "banda");
+            const hasTarjeta = customMessages.some((m) => m.type === "tarjeta");
+
+            const customMessagesHtml =
+              hasBanda || hasTarjeta
+                ? `
+              <div class="order-custom-banners">
+                ${
+                  hasBanda
+                    ? `
+                  <div class="custom-banner is-banda" title="Ver mensaje de banda personalizada">
+                    <div class="banner-left">
+                      <div class="banner-icon-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+                      </div>
+                      <div class="banner-info">
+                        <span class="banner-title">Banda Personalizada</span>
+                        <span class="banner-sub">Lleva mensaje para listón</span>
+                      </div>
+                    </div>
+                    <div class="banner-action">
+                      <span>Ver</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                  </div>
+                `
+                    : ""
+                }
+                ${
+                  hasTarjeta
+                    ? `
+                  <div class="custom-banner is-tarjeta" title="Ver dedicatoria para tarjeta personalizada">
+                    <div class="banner-left">
+                      <div class="banner-icon-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                      </div>
+                      <div class="banner-info">
+                        <span class="banner-title">Tarjeta Personalizada</span>
+                        <span class="banner-sub">Lleva dedicatoria adjunta</span>
+                      </div>
+                    </div>
+                    <div class="banner-action">
+                      <span>Ver</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                    </div>
+                  </div>
+                `
+                    : ""
+                }
+              </div>
+            `
+                : "";
+
             return `
             <article class="order-card glass ${pulseClass}" data-id="${order.id}">
       <!-- Imagen de portada del pedido -->
@@ -850,6 +1035,8 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                 ${name}
               </div>
+
+              ${customMessagesHtml}
 
               <div class="order-items">
                 ${itemsHtml}
@@ -948,10 +1135,52 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
           )
           .join("");
 
+        const customMessages = extractOrderCustomMessages(order);
+        const customMessagesModalHtml =
+          customMessages.length > 0
+            ? `
+            <div class="modal-section">
+              <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+                Mensajes Personalizados (Banda / Tarjeta)
+              </h3>
+              <div class="modal-custom-messages-list">
+                ${customMessages
+                  .map(
+                    (msg) => `
+                  <div class="modal-custom-message-card is-${msg.type}">
+                    <div class="modal-custom-msg-top">
+                      <span class="custom-msg-badge">
+                        ${
+                          msg.type === "banda"
+                            ? `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>`
+                            : `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>`
+                        }
+                        <span>${escapeHtml(msg.label)}</span>
+                      </span>
+                      ${msg.productName ? `<span class="custom-msg-product">Producto: <strong>${escapeHtml(msg.productName)}</strong></span>` : ""}
+                      <button class="copy-msg-btn" data-copy="${escapeHtml(msg.text)}" title="Copiar al portapapeles">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                        <span>Copiar</span>
+                      </button>
+                    </div>
+                    <div class="modal-custom-msg-content">“${escapeHtml(msg.text)}”</div>
+                  </div>
+                `,
+                  )
+                  .join("")}
+              </div>
+            </div>
+          `
+            : "";
+
         const noteHtml = order.customer_note
           ? `
             <div class="modal-section">
-              <h3>Nota del Cliente</h3>
+              <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Nota del Cliente
+              </h3>
               <div class="modal-note-box">${order.customer_note}</div>
             </div>
           `
@@ -964,7 +1193,11 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
               order.status !== "processing"
                 ? `
               <button class="btn-status-change to-processing" data-action-status="processing" data-id="${order.id}">
-                ⚙️ Marcar en Proceso
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+                <span>Marcar en Proceso</span>
               </button>
             `
                 : ""
@@ -973,7 +1206,11 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
               order.status !== "completed"
                 ? `
               <button class="btn-status-change to-completed" data-action-status="completed" data-id="${order.id}">
-                ✅ Completar Pedido
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                  <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                <span>Completar Pedido</span>
               </button>
             `
                 : ""
@@ -982,7 +1219,11 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
               order.status !== "on-hold"
                 ? `
               <button class="btn-status-change to-on-hold" data-action-status="on-hold" data-id="${order.id}">
-                ⏳ Poner en Espera
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 6 12 12 16 14"/>
+                </svg>
+                <span>Poner en Espera</span>
               </button>
             `
                 : ""
@@ -991,7 +1232,12 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
               order.status !== "cancelled" && order.status !== "completed"
                 ? `
               <button class="btn-status-change to-cancelled" data-action-status="cancelled" data-id="${order.id}">
-                ❌ Cancelar
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="15" y1="9" x2="9" y2="15"/>
+                  <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+                <span>Cancelar</span>
               </button>
             `
                 : ""
@@ -1011,14 +1257,20 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
 
             <div class="modal-section modal-grid-2">
               <div class="address-block">
-                <h3>Datos del Cliente</h3>
+                <h3>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  Datos del Cliente
+                </h3>
                 <p><strong>Nombre:</strong> ${name}</p>
                 <p><strong>Email:</strong> <a href="mailto:${order.billing?.email}" style="color: var(--primary); text-decoration: none;">${order.billing?.email || "N/A"}</a></p>
                 <p><strong>Teléfono:</strong> <a href="tel:${order.billing?.phone}" style="color: var(--primary); text-decoration: none;">${order.billing?.phone || "N/A"}</a></p>
               </div>
 
               <div class="address-block">
-                <h3>Dirección de Envío</h3>
+                <h3>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                  Dirección de Envío
+                </h3>
                 <p>${order.shipping?.address_1 || order.billing?.address_1 || "No especificada"}</p>
                 <p>${order.shipping?.address_2 || order.billing?.address_2 || ""}</p>
                 <p>${order.shipping?.city || order.billing?.city || ""}, ${order.shipping?.state || order.billing?.state || ""}</p>
@@ -1026,10 +1278,15 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
               </div>
             </div>
 
+            ${customMessagesModalHtml}
+
             ${noteHtml}
 
             <div class="modal-section">
-              <h3>Productos</h3>
+              <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Productos
+              </h3>
               <table class="items-table">
                 <thead>
                   <tr>
@@ -1050,11 +1307,32 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
             </div>
 
             <div class="modal-section">
-              <h3>Acciones de Seguimiento</h3>
+              <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                Acciones de Seguimiento
+              </h3>
               ${actionPanelHtml}
             </div>
           </div>
         `;
+
+        // Añadir escuchador para botones de copiar mensaje
+        modalBody.querySelectorAll(".copy-msg-btn").forEach((btn) => {
+          btn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const textToCopy = (btn as HTMLElement).dataset.copy || "";
+            try {
+              await navigator.clipboard.writeText(textToCopy);
+              const originalHtml = btn.innerHTML;
+              btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> <span style="color: var(--success);">¡Copiado!</span>`;
+              setTimeout(() => {
+                btn.innerHTML = originalHtml;
+              }, 2000);
+            } catch (err) {
+              console.error("Error al copiar texto:", err);
+            }
+          });
+        });
 
         // Añadir escuchadores para el cambio de estado
         modalBody.querySelectorAll(".btn-status-change").forEach((btn) => {
