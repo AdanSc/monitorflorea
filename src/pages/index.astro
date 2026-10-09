@@ -214,6 +214,14 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
           <span class="label">Completados</span>
           <span class="value" style="color: var(--success);">0</span>
         </div>
+        <div
+          id="statFailed"
+          class="stat-card glass"
+          style="border-left: 4px solid var(--danger);"
+        >
+          <span class="label">Fallidos</span>
+          <span class="value" style="color: var(--danger);">0</span>
+        </div>
       </section>
 
       <!-- Barra de Filtros y Búsqueda -->
@@ -226,6 +234,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
           <button class="filter-btn" data-status="on-hold">En Espera</button>
           <button class="filter-btn" data-status="completed">Completados</button
           >
+          <button class="filter-btn" data-status="failed">Fallidos</button>
         </div>
         <div class="search-wrapper">
           <svg
@@ -940,6 +949,8 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
             const statusClass = `status-${order.status}`;
             const statusText = translateStatus(order.status);
             const pulseClass = order._isNew ? "new-order-pulse" : "";
+            const isFailed = order.status === "failed";
+            const failedClass = isFailed ? "order-card-failed" : "";
 
             // Generar filas de productos (máximo 3 en tarjeta para no colapsar)
             const itemsToDisplay = order.line_items || [];
@@ -1017,12 +1028,43 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
                 : "";
 
             return `
-            <article class="order-card glass ${pulseClass}" data-id="${order.id}">
+            <article class="order-card glass ${pulseClass} ${failedClass}" data-id="${order.id}">
       <!-- Imagen de portada del pedido -->
       <div class="order-card-image-wrapper">
         <img src="${order.line_items?.[0]?.image?.src || ""}" alt="${order.line_items?.[0]?.name || "Producto"}" class="order-card-image" />
         <button class="zoom-btn" data-src="${order.line_items?.[0]?.image?.src || ""}" aria-label="Ver imagen en grande"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="1em" height="1em"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+        ${
+          isFailed
+            ? `
+          <div class="failed-image-pill">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span>FALLIDO</span>
+          </div>
+        `
+            : ""
+        }
       </div>
+
+      ${
+        isFailed
+          ? `
+        <div class="failed-attention-banner">
+          <div class="banner-left">
+            <div class="banner-icon-box failed-banner-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div class="banner-info">
+              <span class="banner-title failed-banner-title">Requiere Seguimiento Especial</span>
+              <span class="banner-sub failed-banner-sub">El pago no se concretó exitosamente</span>
+            </div>
+          </div>
+          <div class="banner-action failed-banner-tag">
+            <span>Atención</span>
+          </div>
+        </div>
+      `
+          : ""
+      }
               <div class="order-header">
                 <div>
                   <div class="order-number">#${order.number}</div>
@@ -1056,6 +1098,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
                     <option value="on-hold" ${order.status === "on-hold" ? "selected" : ""}>En Espera</option>
                     <option value="completed" ${order.status === "completed" ? "selected" : ""}>Completado</option>
                     <option value="cancelled" ${order.status === "cancelled" ? "selected" : ""}>Cancelado</option>
+                    <option value="failed" ${order.status === "failed" ? "selected" : ""}>Fallido</option>
                   </select>
                   <button class="quick-status-btn" data-id="${order.id}" data-action="view">Detalles</button>
                 </div>
@@ -1247,6 +1290,21 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
 
         modalBody.innerHTML = `
           <div class="modal-body-content">
+            ${
+              order.status === "failed"
+                ? `
+              <div class="modal-failed-notice">
+                <div class="modal-failed-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="modal-failed-text">
+                  <strong>Pedido en Estado Fallido — Requiere Seguimiento Especial</strong>
+                  <p>La transacción no pudo completarse satisfactoriamente o fue rechazada por la pasarela de pago. Se recomienda revisar el historial de pago y ponerse en contacto con el cliente para ofrecerle asistencia directa.</p>
+                </div>
+              </div>
+            `
+                : ""
+            }
             <h2>
               Pedido #${order.number}
               <span class="status-badge status-${order.status}">${translateStatus(order.status)}</span>
@@ -1480,6 +1538,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
         const processingEl = document.querySelector("#statProcessing .value");
         const onHoldEl = document.querySelector("#statOnHold .value");
         const completedEl = document.querySelector("#statCompleted .value");
+        const failedEl = document.querySelector("#statFailed .value");
 
         if (!totalEl) return;
 
@@ -1489,6 +1548,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
           processing: orders.filter((o) => o.status === "processing").length,
           "on-hold": orders.filter((o) => o.status === "on-hold").length,
           completed: orders.filter((o) => o.status === "completed").length,
+          failed: orders.filter((o) => o.status === "failed").length,
         };
 
         totalEl.textContent = String(stats.total);
@@ -1496,6 +1556,7 @@ const PUBLIC_PUSHER_CLUSTER = import.meta.env.PUBLIC_PUSHER_CLUSTER || "";
         processingEl.textContent = String(stats.processing);
         onHoldEl.textContent = String(stats["on-hold"]);
         completedEl.textContent = String(stats.completed);
+        if (failedEl) failedEl.textContent = String(stats.failed);
 
         // Badge de pestaña: pedidos que aún requieren atención
         const activeCount = stats.pending + stats.processing + stats["on-hold"];

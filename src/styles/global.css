@@ -272,6 +272,11 @@ header {
   color: white;
   box-shadow: 0 4px 12px var(--primary-glow);
 }
+.filter-btn[data-status="failed"].active {
+  background: var(--danger);
+  border-color: var(--danger);
+  box-shadow: 0 4px 12px var(--danger-glow);
+}
 
 .search-wrapper {
   position: relative;
@@ -376,6 +381,113 @@ header {
   background-color: rgba(79, 70, 229, 0.06) !important;
   border-color: var(--primary) !important;
   animation: new-order-glow 2.5s infinite ease-in-out;
+}
+
+/* Tarjeta de Pedido Fallido - Borde rojo y máxima atención visual */
+.order-card.order-card-failed {
+  border: 2px solid #ef4444 !important;
+  background: linear-gradient(180deg, rgba(254, 242, 242, 0.96) 0%, rgba(255, 255, 255, 0.98) 130px, var(--card-bg) 100%) !important;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.18), 0 0 0 1px rgba(239, 68, 68, 0.25);
+  animation: failed-order-glow 2.8s infinite ease-in-out;
+  overflow: hidden;
+}
+
+.order-card.order-card-failed:hover {
+  border-color: #dc2626 !important;
+  box-shadow: 0 8px 30px rgba(239, 68, 68, 0.32), 0 0 0 2px rgba(239, 68, 68, 0.45);
+  transform: translateY(-4px);
+}
+
+.order-card.order-card-failed .order-number {
+  color: #b91c1c;
+}
+
+.order-card.order-card-failed .status-badge.status-failed {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  border-color: #b91c1c !important;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  letter-spacing: 0.06em;
+}
+
+.order-card.order-card-failed .card-status-select {
+  border-color: rgba(239, 68, 68, 0.45);
+  background-color: #fef2f2;
+}
+
+/* Badge flotante en la esquina superior izquierda de la foto */
+.failed-image-pill {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: rgba(220, 38, 38, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 0.32rem 0.65rem;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.45);
+  z-index: 2;
+  text-transform: uppercase;
+}
+
+/* Banner de llamado de atención especial dentro de la tarjeta */
+.failed-attention-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(254, 226, 226, 0.95) 0%, rgba(254, 202, 202, 0.5) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.08);
+  margin-top: 0.15rem;
+  margin-bottom: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.failed-banner-icon {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+}
+
+.failed-banner-title {
+  color: #b91c1c !important;
+  font-weight: 700;
+}
+
+.failed-banner-sub {
+  color: #991b1b !important;
+  opacity: 0.85;
+}
+
+.failed-banner-tag {
+  background: rgba(220, 38, 38, 0.12);
+  color: #dc2626;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+@keyframes failed-order-glow {
+  0%, 100% {
+    box-shadow: 0 4px 18px rgba(239, 68, 68, 0.16), 0 0 0 1px rgba(239, 68, 68, 0.25);
+  }
+  50% {
+    box-shadow: 0 6px 30px rgba(239, 68, 68, 0.32), 0 0 0 2px rgba(239, 68, 68, 0.6);
+  }
 }
 
 .order-header {
@@ -838,6 +950,47 @@ header {
   color: var(--warning);
   font-size: 0.95rem;
   line-height: 1.5;
+}
+
+/* Aviso de pedido fallido dentro del modal */
+.modal-failed-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(254, 226, 226, 0.7) 100%);
+  border: 1.5px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.08);
+}
+
+.modal-failed-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.modal-failed-text strong {
+  display: block;
+  font-size: 0.95rem;
+  color: #b91c1c;
+  margin-bottom: 0.25rem;
+}
+
+.modal-failed-text p {
+  font-size: 0.85rem;
+  color: #7f1d1d;
+  line-height: 1.45;
+  margin: 0;
 }
 
 /* Modal line items table */
